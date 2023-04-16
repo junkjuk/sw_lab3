@@ -8,7 +8,7 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 go build -v -o /usr/src/fizzbuzz-app/bin/
 
-FROM scratch
+FROM gcr.io/distroless/base-debian11 AS build-release-stage
 WORKDIR / 
 COPY --from=build-stage /usr/src/fizzbuzz-app/bin/ ./
 COPY --from=build-stage /usr/src/fizzbuzz-app/templates ./templates
