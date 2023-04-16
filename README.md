@@ -197,11 +197,11 @@ CMD ["./fizzbuzz", "serve"]
 ```powershell
 docker run -p 8080:80 <image>
 ```
-Ось залежності які є у проекті
+Ось [залежності](https://github.com/junkjuk/sw_lab3/commit/e6ee916560652b269d6a0d360e7f349987f57e26#diff-c178fa3ea321c45b2bf9ac8b041bbb85f11293ea68378ec470d1415e81443521) які є у проекті
 
 ![image](https://user-images.githubusercontent.com/38862851/232307988-4a6462eb-2b16-4400-8850-62991971524d.png)
 
-Ось сам докерфайл
+Ось сам [докерфайл](https://github.com/junkjuk/sw_lab3/commit/25b8db12c2895b4c0d570e1d2121dca4e310c842)
 
  ```dockerfile
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
