@@ -99,3 +99,91 @@ python:3.10-bullseye Розмір образу - 1.09gb, час збірки - 2
 2 - не вказувати latest(чи щось типу того) в залежностях, бо може статись сюрприз)
 
 3 - коли розмір образу є критичним моментом, то можна використати більш базову версію, що зменшить розмір вашого образу
+
+# Go
+
+## [Завдання 1]
+
+Спочатку я стоврив ткий докерфайл
+
+ ```dockerfile
+FROM golang:1.20.3-bullseye
+
+WORKDIR /usr/src/fizzbuzz-app 
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN go build -v -o /usr/src/fizzbuzz-app/
+
+CMD ["./fizzbuzz", "serve"]
+```
+
+Виміри: Розмір образу - 880mb, час збірки - 30s
+
+Ось перелік файлів які потрапили в наш образ
+
+![image](https://user-images.githubusercontent.com/38862851/232289977-d79ca884-c68c-45cf-815a-790f312c95c7.png)
+
+Для запуску програми нам потрібен лише скомпільований файл, тому ми можемо перенести в образ лише бінарний файл, і це не вплине на роботу програми
+
+## [Завдання 2]
+
+Я переписав докерфайл наступним чином
+
+ ```dockerfile
+FROM golang:1.20.3-bullseye as build-stage
+
+WORKDIR /usr/src/fizzbuzz-app 
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN CGO_ENABLED=0 go build -v -o /usr/src/fizzbuzz-app/bin/
+
+FROM scratch
+WORKDIR / 
+COPY --from=build-stage /usr/src/fizzbuzz-app/bin/ ./
+COPY --from=build-stage /usr/src/fizzbuzz-app/templates ./templates
+CMD ["./fizzbuzz", "serve"]
+```
+
+Тепер з наших вайлів до контейнера потрапило тільки бінарний файл та папка templates. Ось скріншот
+
+![image](https://user-images.githubusercontent.com/38862851/232300311-f7a69127-add0-40dc-9d4a-b161e2dcd460.png)
+
+Я пробував використати команду docker exec (як я зрозумів цього не можна зробити у scratch образі) і docker export (в мене не відкривався нормально файл :), тому я використав docker desktop)
+
+Виміри: Розмір образу - 9.8mb, час збірки - 12s
+
+Чи зручно користуватись таким образом - якщо потрібно взаємодіяти з самим контейнером то ні, але якщо ми хочемо "запустити і забути" то різниці я не побачив
+
+## [Завдання 3]
+
+Я відредагував докерфайл наступним чином
+
+ ```dockerfile
+FROM golang:1.20.3-bullseye as build-stage
+
+WORKDIR /usr/src/fizzbuzz-app 
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN CGO_ENABLED=0 go build -v -o /usr/src/fizzbuzz-app/bin/
+
+FROM gcr.io/distroless/base-debian11 AS build-release-stage
+WORKDIR / 
+COPY --from=build-stage /usr/src/fizzbuzz-app/bin/ ./
+COPY --from=build-stage /usr/src/fizzbuzz-app/templates ./templates
+CMD ["./fizzbuzz", "serve"]
+```
+
+Ось фали в цій системі. Видно що потрапили до образу також лише потрібні файли, але інших директорій сталобільше
+
+![image](https://user-images.githubusercontent.com/38862851/232302269-4a165fb3-0b67-484a-8eaf-f3ddd9babc07.png)
+
+Виміри: Розмір образу - 30.2mb, час збірки - 10s
