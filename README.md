@@ -187,3 +187,43 @@ CMD ["./fizzbuzz", "serve"]
 ![image](https://user-images.githubusercontent.com/38862851/232302269-4a165fb3-0b67-484a-8eaf-f3ddd9babc07.png)
 
 Виміри: Розмір образу - 30.2mb, час збірки - 10s
+
+# C#
+
+В каталозі C#/SimpleWebApi запускаємо команду docker build 
+
+При запуску контейнера потрібно буде звязати 80 порт контейнера і порт на якому ви хочемо бачити результат
+
+```powershell
+docker run -p 8080:80 <image>
+```
+Ось залежності які є у проекті
+
+![image](https://user-images.githubusercontent.com/38862851/232307988-4a6462eb-2b16-4400-8850-62991971524d.png)
+
+Ось сам докерфайл
+
+ ```dockerfile
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+COPY ["SimpleWebApi/SimpleWebApi.csproj", "SimpleWebApi/"]
+RUN dotnet restore "SimpleWebApi/SimpleWebApi.csproj"
+COPY . ./
+WORKDIR "/src/SimpleWebApi"
+RUN dotnet build "SimpleWebApi.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "SimpleWebApi.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "SimpleWebApi.dll"]
+```
+
+Виміри: Розмір образу - 217mb, час збірки - 60s без кешування, з кешуванням 2-5s
