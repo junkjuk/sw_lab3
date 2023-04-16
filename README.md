@@ -59,7 +59,7 @@ CMD [ "uvicorn", "spaceship.main:app", "--host=0.0.0.0", "--port=8080" ]
 
 При доданні змін у spaceship/app.py час і розмір збірки залишився таким самим 
 
-## [Завдання 4] (https://github.com/junkjuk/sw_lab3/commit/1c4ee168ca4d701513598d73d422567910cfeb5d)
+## [Завдання 4](https://github.com/junkjuk/sw_lab3/commit/1c4ee168ca4d701513598d73d422567910cfeb5d)
 Ось як я змінив докерфайл
 ```dockerfile
 FROM python:3.10-slim
@@ -69,7 +69,7 @@ FROM python:3.10-slim
 
 Виміри: Розмір образу - 309mb, час збірки - 25s
 
-## [Завдання 5] (https://github.com/junkjuk/sw_lab3/commit/a9cfb3b49902ec5152821c278a887ad14e48c1ab)
+## [Завдання 5](https://github.com/junkjuk/sw_lab3/commit/a9cfb3b49902ec5152821c278a887ad14e48c1ab)
 
 Я додав наступний код у файл api.py
 
